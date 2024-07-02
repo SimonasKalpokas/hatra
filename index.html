@@ -1,6 +1,34 @@
-<script src="https://unpkg.com/htmx.org@2.0.0"></script>
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Calendar</title>
+    <script src="https://unpkg.com/htmx.org@2.0.0"></script>
 
+    <link rel="stylesheet" href="static/style.css">
+  </head>
+  <body>
+    <button hx-post="/clicked" hx-swap="outerHTML">
+      Click Me
+    </button>
 
-<button hx-post="/clicked" hx-swap="outerHTML">
-  Click Me
-</button>
+    <table>
+      <thead>
+        <tr>
+          <th class="block" />
+          <th class="block" />
+          <th class="block" />
+        </tr> 
+      </thead>
+      <tbody>
+        {{ range .Days }}
+        <tr>
+          {{ range . }}
+            <td class="block">{{ .Toggle }}</td>
+          {{ end }}
+        </tr>
+        {{ end }}
+      </tbody>
+    </table>
+  </body>
+</html>
+

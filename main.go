@@ -4,66 +4,54 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
-	"time"
 )
+
+// time
+
+type Date struct {
+	Year  int
+	Month int
+	Day   int
+}
 
 // data
 
 type DayNugget struct {
-	Date time.Time
-	Toggle bool
+	Date	Date
+	Toggle	bool
+}
+
+type HabitPageData struct {
+	// TODO: Maybe think about storing by month?
+	Days [][]DayNugget 
 }
 
 
 // display
 
 func main() {
-	data := []DayNugget{
-		{time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC), false},
-		{time.Date(2020, 1, 2, 0, 0, 0, 0, time.UTC), false},
-		{time.Date(2020, 1, 3, 0, 0, 0, 0, time.UTC), false},
-		{time.Date(2020, 1, 4, 0, 0, 0, 0, time.UTC), false},
-		{time.Date(2020, 1, 5, 0, 0, 0, 0, time.UTC), false},
-		{time.Date(2020, 1, 6, 0, 0, 0, 0, time.UTC), false},
-		{time.Date(2020, 1, 7, 0, 0, 0, 0, time.UTC), false},
-		{time.Date(2020, 1, 8, 0, 0, 0, 0, time.UTC), false},
-		{time.Date(2020, 1, 9, 0, 0, 0, 0, time.UTC), false},
-	}
-
-	templ counts(global, sessiion int) {
-		<form action="/clicked" method="post">
-	}
-
+	fs := http.FileServer(http.Dir("./static"))
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		templ, err := template.New("index").Parse(`
-			<!DOCTYPE html>
-			<html>
-			<body>
-			<h1>Days of the Week</h1>
-			<ul>
-			<ol>
-			<li><a href="/clicked">Monday</a></li>
-			<li><a href="/clicked">Tuesday</a></li>
-			<li><a href="/clicked">Wednesday</a></li>
-			<li><a href="/clicked">Thursday</a></li>
-			<li><a href="/clicked">Friday</a></li>
-			<li><a href="/clicked">Saturday</a></li>
-			<li><a href="/clicked">Sunday</a></li>
-			</ol>
-			</ul>
-			</body>
-			</html>
-		`)
+		templ := template.Must(template.ParseFiles("index.html"))
 
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+		data := HabitPageData{
+			Days: [][]DayNugget{
+				{
+					{Date: Date{Year: 2020, Month: 1, Day: 1}, Toggle: false},
+					{Date: Date{Year: 2020, Month: 1, Day: 2}, Toggle: false},
+					{Date: Date{Year: 2020, Month: 1, Day: 3}, Toggle: false},
+					{Date: Date{Year: 2020, Month: 1, Day: 4}, Toggle: false},
+				},
+				{
+					{Date: Date{Year: 2020, Month: 1, Day: 1}, Toggle: true},
+					{Date: Date{Year: 2020, Month: 1, Day: 2}, Toggle: false},
+					{Date: Date{Year: 2020, Month: 1, Day: 3}, Toggle: false},
+					{Date: Date{Year: 2020, Month: 1, Day: 4}, Toggle: false},
+				},
+			},
 		}
-
-		err = templ.Execute(w, data)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
+		templ.Execute(w, data)
 	})
 
 	http.HandleFunc("/clicked", func(w http.ResponseWriter, r *http.Request) {
