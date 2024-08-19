@@ -24,7 +24,6 @@ type Date struct {
 }
 
 // Parses Date that is in format of YYYY-MM-DD
-//
 // TODO: move to separate module?
 func ParseDate(input string) (Date, error) {
 	parts := strings.Split(input, "-")
@@ -130,7 +129,14 @@ func Now() Date {
 
 // display
 
-func DisplayHabit(habit Habit) {
+func DisplayHabitsByMonthHorizontal(habits []Habit) {
+	for _, habit := range habits {
+		DisplayHabitByMonthHorizontal(habit)
+		fmt.Println()
+	}
+}
+
+func DisplayHabitByMonthHorizontal(habit Habit) {
 	today := Now()
 	fmt.Println(habit.Name)
 
@@ -146,26 +152,74 @@ func DisplayHabit(habit Habit) {
 				break
 			}
 			if len(habit.Days) <= dateIndex {
-				fmt.Print(".")
+				fmt.Print("\033[91m□\033[39m")
 				continue
 			}
 			date := habit.Days[dateIndex]
 			if date.Month == month && date.Day == day {
 				dateIndex = dateIndex + 1
-				fmt.Print("+")
+				fmt.Print("\033[92m■\033[39m")
 			} else {
-				fmt.Print(".")
+				fmt.Print("\033[91m□\033[39m")
 			}
 		}
 		fmt.Println()
 	}
 }
 
-func main() {
-	habits := GetHabits()
+func DisplayHabitsByMonthVertical(habits []Habit) {
+	today := Now()
+
 	for _, habit := range habits {
-		DisplayHabit(habit)
+		monthCount := today.Month - habit.Days[0].Month
+		fmt.Printf("%*.*s", monthCount*7, monthCount*7, habit.Name)
+	}
+	fmt.Println()
+
+	monthNames := [12]string{"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
+	monthDayCounts := [12]int{31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
+	lastMonth := today.Month
+	for _, habit := range habits {
+		firstMonth := habit.Days[0].Month
+		for month := firstMonth; month <= lastMonth; month = month + 1 {
+			fmt.Printf("%s ", monthNames[month-1])
+		}
+		fmt.Print("  ")
+	}
+	fmt.Println()
+
+	for day := 1; day <= 31; day = day + 1 {
+		for _, habit := range habits {
+			firstMonth := habit.Days[0].Month
+			for month := firstMonth; month <= lastMonth; month = month + 1 {
+				if (day > monthDayCounts[month-1]) || (month == lastMonth && day > today.Day) {
+					fmt.Printf("    ")
+					continue
+				}
+				if slices.Contains(habit.Days, Date{Year: today.Year, Month: month, Day: day}) {
+					fmt.Printf(" \033[92m■\033[39m  ")
+				} else {
+					fmt.Printf(" \033[91m□\033[39m  ")
+				}
+			}
+			fmt.Print("  ")
+		}
 		fmt.Println()
+	}
+}
+
+func main() {
+	isVertical := true
+	args := os.Args
+	if len(args) >= 2 && args[1] == "horizontal" {
+		isVertical = false
+	}
+
+	habits := GetHabits()
+	if isVertical {
+		DisplayHabitsByMonthVertical(habits)
+	} else {
+		DisplayHabitsByMonthHorizontal(habits)
 	}
 }
 
