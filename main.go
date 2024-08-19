@@ -3,6 +3,7 @@ package main
 import (
 	"cmp"
 	"errors"
+	"flag"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -167,6 +168,48 @@ func DisplayHabitByMonthHorizontal(habit Habit) {
 	}
 }
 
+func DisplayHabitsByWeekHorizontal(habits []Habit) {
+	for _, habit := range habits {
+		DisplayHabitByWeekHorizontal(habit)
+		fmt.Println()
+	}
+}
+
+func (date *Date) AddDays(days int) {
+	monthDayCounts := [12]int{31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
+	day := date.Day + days
+	month := date.Month
+	for day > monthDayCounts[month] {
+		day = day - monthDayCounts[month]
+		month = month + 1
+	}
+	date.Day = day
+	date.Month = month
+}
+
+func DisplayHabitByWeekHorizontal(habit Habit) {
+	today := Now()
+
+	fmt.Println(habit.Name)
+	weekDays := [7]string{"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"}
+
+	// TODO: respect the actual start of the week
+	for weekDay := 0; weekDay < 7; weekDay = weekDay + 1 {
+		fmt.Printf("%s ", weekDays[weekDay])
+		date := habit.Days[0]
+		date.AddDays(weekDay)
+		for (date.Month < today.Month) || (date.Month == today.Month && date.Day <= today.Day) {
+			if slices.Contains(habit.Days, date) {
+				fmt.Printf(" \033[92m■\033[39m  ")
+			} else {
+				fmt.Printf(" \033[91m□\033[39m  ")
+			}
+			date.AddDays(7)
+		}
+		fmt.Println()
+	}
+}
+
 func DisplayHabitsByMonthVertical(habits []Habit) {
 	today := Now()
 
@@ -209,17 +252,29 @@ func DisplayHabitsByMonthVertical(habits []Habit) {
 }
 
 func main() {
-	isVertical := true
-	args := os.Args
-	if len(args) >= 2 && args[1] == "horizontal" {
-		isVertical = false
-	}
+	direction := flag.String("direction", "horizontal", "either vertical or horizontal")
+	period := flag.String("period", "month", "either month or week")
+	flag.Parse()
 
 	habits := GetHabits()
-	if isVertical {
-		DisplayHabitsByMonthVertical(habits)
+	if *direction == "horizontal" {
+		if *period == "month" {
+			DisplayHabitsByMonthHorizontal(habits)
+		} else if *period == "week" {
+			DisplayHabitsByWeekHorizontal(habits)
+		} else {
+			panic("Unrecognized period")
+		}
+	} else if *direction == "vertical" {
+		if *period == "month" {
+			DisplayHabitsByMonthVertical(habits)
+		} else if *period == "week" {
+			panic("Sorry this is not yet implemented")
+		} else {
+			panic("Unrecognized period")
+		}
 	} else {
-		DisplayHabitsByMonthHorizontal(habits)
+		panic("Unrecognized direction")
 	}
 }
 
