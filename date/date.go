@@ -19,6 +19,65 @@ func NewDate(year, month, day int) Date {
 	return Date{year, month, day}
 }
 
+const (
+	daysPer400Years = 365*400 + 97
+	daysPer100Years = 365*100 + 24
+	daysPer4Years   = 365*4 + 1
+)
+
+func daysSinceEpochForYear(year int) int {
+	y := year - 2000
+
+	// Add in days from 400-year cycles.
+	n := y / 400
+	y -= 400 * n
+	d := daysPer400Years * n
+
+	// Add in 100-year cycles.
+	n = y / 100
+	y -= 100 * n
+	d += daysPer100Years * n
+
+	// Add in 4-year cycles.
+	n = y / 4
+	y -= 4 * n
+	d += daysPer4Years * n
+
+	// Add in non-leap years.
+	n = y
+	d += 365 * n
+
+	return d
+}
+
+// TODO: explain values and operation with comments
+// add tests and refactor
+func daysSinceEpoch(date Date) int {
+	days := daysSinceEpochForYear(date.year)
+
+	monthDayCounts := [12]int{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
+	for month := 0; month < date.month-1; month++ {
+		days += monthDayCounts[month]
+	}
+
+	if isLeapYear(date.year) && date.month > 2 {
+		days++
+	}
+
+	days += date.day - 2
+
+	return days
+}
+
+func isLeapYear(year int) bool {
+	return year%4 == 0 && (year%100 != 0 || year%400 == 0)
+}
+
+func (date Date) WeekDay() int {
+	days := daysSinceEpoch(date)
+	return (days+6)%7 + 1
+}
+
 // Parses Date that is in format of YYYY-MM-DD
 func ParseDate(input string) (Date, error) {
 	parts := strings.Split(input, "-")
@@ -71,11 +130,12 @@ func Today() Date {
 }
 
 func (date Date) AddDays(days int) Date {
+	// TODO: handle leap years and another years in general properly
 	monthDayCounts := [12]int{31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
 	day := date.day + days
 	month := date.month
-	for day > monthDayCounts[month] {
-		day = day - monthDayCounts[month]
+	for day > monthDayCounts[month-1] {
+		day = day - monthDayCounts[month-1]
 		month = month + 1
 	}
 	return Date{date.year, month, day}

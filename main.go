@@ -114,10 +114,10 @@ func DisplayHabitByWeekHorizontal(habit Habit) {
 	fmt.Println(habit.Name)
 	weekDays := [7]string{"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"}
 
-	// TODO: respect the actual start of the week
-	for weekDay := 0; weekDay < 7; weekDay = weekDay + 1 {
-		fmt.Printf("%s ", weekDays[weekDay])
-		date := habit.Days[0].AddDays(weekDay)
+	habitStartDay := habit.Days[0]
+	for weekDay := 1; weekDay <= 7; weekDay = weekDay + 1 {
+		fmt.Printf("%s ", weekDays[weekDay-1])
+		date := habitStartDay.AddDays(weekDay - int(habitStartDay.WeekDay()))
 		for (date.Month() < today.Month()) || (date.Month() == today.Month() && date.Day() <= today.Day()) {
 			if slices.Contains(habit.Days, date) {
 				fmt.Printf(" \033[92m■\033[39m  ")
