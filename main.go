@@ -34,7 +34,7 @@ func GetHabits() []Habit {
 			if line == "" {
 				continue
 			}
-			date, err := date.ParseDate(line)
+			date, err := date.ParseDate(line[:10])
 			if err != nil {
 				fmt.Println(line)
 				panic("parsing failed")
