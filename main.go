@@ -117,7 +117,9 @@ func DisplayHabitByWeekHorizontal(habit Habit) {
 	date := habitStartDay.AddDays(7 - int(habitStartDay.WeekDay()))
 	monthNames := [12]string{"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
 	fmt.Printf("    ")
-	for (date.Month() < today.Month()) || (date.Month() == today.Month() && date.Day() <= today.Day()) {
+	for date.Year() < today.Year() ||
+		(date.Year() == today.Year() && date.Month() < today.Month()) ||
+		(date.Year() == today.Year() && date.Month() == today.Month() && date.Day() <= today.Day()) {
 		if date.Day() <= 7 {
 			fmt.Printf("%s", monthNames[date.Month()-1])
 		} else {
@@ -133,7 +135,9 @@ func DisplayHabitByWeekHorizontal(habit Habit) {
 	for weekDay := 1; weekDay <= 7; weekDay = weekDay + 1 {
 		fmt.Printf("%s ", weekDays[weekDay-1])
 		date := habitStartDay.AddDays(weekDay - int(habitStartDay.WeekDay()))
-		for (date.Month() < today.Month()) || (date.Month() == today.Month() && date.Day() <= today.Day()) {
+		for date.Year() < today.Year() ||
+			(date.Year() == today.Year() && date.Month() < today.Month()) ||
+			(date.Year() == today.Year() && date.Month() == today.Month() && date.Day() <= today.Day()) {
 			if slices.Contains(habit.Days, date) {
 				fmt.Printf(" \033[92m■\033[39m ")
 			} else {

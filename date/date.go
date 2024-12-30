@@ -130,15 +130,20 @@ func Today() Date {
 }
 
 func (date Date) AddDays(days int) Date {
-	// TODO: handle leap years and another years in general properly
+	// TODO: handle leap years
 	monthDayCounts := [12]int{31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
 	day := date.day + days
 	month := date.month
+	year := date.year
 	for day > monthDayCounts[month-1] {
 		day = day - monthDayCounts[month-1]
 		month = month + 1
+		for month > 12 {
+			month -= 12
+			year = year + 1
+		}
 	}
-	return Date{date.year, month, day}
+	return Date{year, month, day}
 }
 
 func (date Date) Year() int {
