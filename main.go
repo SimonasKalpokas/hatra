@@ -109,6 +109,9 @@ func DisplayHabitsByWeekHorizontal(habits []Habit) {
 }
 
 func DisplayHabitByWeekHorizontal(habit Habit) {
+	if len(habit.Days) == 0 {
+		return
+	}
 	today := date.Today()
 
 	fmt.Println(habit.Name)
