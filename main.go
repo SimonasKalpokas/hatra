@@ -18,13 +18,17 @@ type Habit struct {
 	Days []date.Date
 }
 
-func GetHabits() []Habit {
+func GetHabits(habitsToExclude *[]string) []Habit {
 	habits := make([]Habit, 0)
 
 	dataFilePaths, _ := filepath.Glob("./data/*.txt")
 	for _, filePath := range dataFilePaths {
 		exp, _ := regexp.Compile("data\\/(\\w+)\\.txt")
 		name := exp.FindStringSubmatch(filePath)[1]
+
+		if slices.Contains(*habitsToExclude, name) {
+			continue
+		}
 
 		content, _ := os.ReadFile(filePath)
 		lines := strings.Split(string(content), "\n")
@@ -193,24 +197,30 @@ func DisplayHabitsByMonthVertical(habits []Habit) {
 	}
 }
 
-func main() {
-	direction := flag.String("direction", "horizontal", "either vertical or horizontal")
-	period := flag.String("period", "month", "either month or week")
-	flag.Parse()
+func parseExcludeFlag(argument *string) []string {
+	return strings.Split(*argument, ",")
+}
 
-	habits := GetHabits()
-	if *direction == "horizontal" {
-		if *period == "month" {
+func main() {
+	directionFlag := flag.String("direction", "horizontal", "either vertical or horizontal")
+	periodFlag := flag.String("period", "month", "either month or week")
+	excludeFlag := flag.String("exclude", "", "a list of comma separated habits to exclude")
+	flag.Parse()
+	habitsToExclude := parseExcludeFlag(excludeFlag)
+
+	habits := GetHabits(&habitsToExclude)
+	if *directionFlag == "horizontal" {
+		if *periodFlag == "month" {
 			DisplayHabitsByMonthHorizontal(habits)
-		} else if *period == "week" {
+		} else if *periodFlag == "week" {
 			DisplayHabitsByWeekHorizontal(habits)
 		} else {
 			panic("Unrecognized period")
 		}
-	} else if *direction == "vertical" {
-		if *period == "month" {
+	} else if *directionFlag == "vertical" {
+		if *periodFlag == "month" {
 			DisplayHabitsByMonthVertical(habits)
-		} else if *period == "week" {
+		} else if *periodFlag == "week" {
 			panic("Sorry this is not yet implemented")
 		} else {
 			panic("Unrecognized period")
