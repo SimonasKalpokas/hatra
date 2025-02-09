@@ -107,15 +107,15 @@ func DisplayHabitByMonthHorizontal(habit Habit) {
 
 func DisplayHabitsByWeekHorizontal(habits []Habit) {
 	for _, habit := range habits {
+		if len(habit.Days) == 0 {
+			continue
+		}
 		DisplayHabitByWeekHorizontal(habit)
 		fmt.Println()
 	}
 }
 
 func DisplayHabitByWeekHorizontal(habit Habit) {
-	if len(habit.Days) == 0 {
-		return
-	}
 	today := date.Today()
 
 	fmt.Println(habit.Name)
