@@ -23,7 +23,7 @@ func GetHabits(habitsToExclude *[]string) []Habit {
 
 	dataFilePaths, _ := filepath.Glob("./data/*.txt")
 	for _, filePath := range dataFilePaths {
-		exp, _ := regexp.Compile("data\\/(\\w+)\\.txt")
+		exp, _ := regexp.Compile(`data\/(\w+)\.txt`)
 		name := exp.FindStringSubmatch(filePath)[1]
 
 		if slices.Contains(*habitsToExclude, name) {
@@ -209,23 +209,26 @@ func main() {
 	habitsToExclude := parseExcludeFlag(excludeFlag)
 
 	habits := GetHabits(&habitsToExclude)
-	if *directionFlag == "horizontal" {
-		if *periodFlag == "month" {
+	switch *directionFlag {
+	case "horizontal":
+		switch *periodFlag {
+		case "month":
 			DisplayHabitsByMonthHorizontal(habits)
-		} else if *periodFlag == "week" {
+		case "week":
 			DisplayHabitsByWeekHorizontal(habits)
-		} else {
+		default:
 			panic("Unrecognized period")
 		}
-	} else if *directionFlag == "vertical" {
-		if *periodFlag == "month" {
+	case "vertical":
+		switch *periodFlag {
+		case "month":
 			DisplayHabitsByMonthVertical(habits)
-		} else if *periodFlag == "week" {
+		case "week":
 			panic("Sorry this is not yet implemented")
-		} else {
+		default:
 			panic("Unrecognized period")
 		}
-	} else {
+	default:
 		panic("Unrecognized direction")
 	}
 }
