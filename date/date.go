@@ -64,7 +64,7 @@ func daysSinceEpoch(date Date) int {
 		days++
 	}
 
-	days += date.day - 2
+	days += date.day
 
 	return days
 }
@@ -75,7 +75,7 @@ func isLeapYear(year int) bool {
 
 func (date Date) WeekDay() int {
 	days := daysSinceEpoch(date)
-	return (days+6)%7 + 1
+	return (days+5)%7 + 1
 }
 
 // Parses Date that is in format of YYYY-MM-DD
